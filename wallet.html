@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portefeuille</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+
+body{
+margin:0;
+background:#f5f5f5;
+font-family:Arial;
+}
+
+/* ===== TON DESIGN ===== */
+.top{display:flex;justify-content:space-between;padding:15px;}
+.top-box{width:48%;text-align:center;}
+.top-box h4{font-size:14px;margin:0;color:#333;}
+.top-box p{margin-top:8px;font-size:22px;color:#d32f2f;font-weight:bold;}
+
+.history{
+margin:10px 15px;background:#fff;padding:18px;border-radius:12px;
+display:flex;justify-content:space-between;cursor:pointer;
+}
+
+.arrow{color:#999;}
+
+.actions{display:flex;gap:15px;padding:15px;}
+.btn{
+flex:1;padding:15px;border-radius:30px;text-align:center;
+font-weight:bold;color:#fff;cursor:pointer;
+}
+
+.deposit{background:linear-gradient(45deg,#f9a825,#f57f17);}
+.withdraw{background:#3f4a5a;}
+
+.section{padding:10px 15px;font-weight:bold;}
+
+.stat{
+margin:10px 15px;background:#fff;padding:15px;
+border-radius:12px;display:flex;justify-content:space-between;
+}
+
+.stat span:last-child{color:#d32f2f;font-weight:bold;}
+
+.chat{
+position:fixed;right:15px;bottom:90px;
+width:55px;height:55px;background:#2196f3;
+border-radius:50%;display:flex;align-items:center;justify-content:center;
+color:#fff;font-size:22px;
+}
+
+.support{
+position:fixed;right:15px;bottom:20px;
+width:55px;height:55px;
+background:linear-gradient(45deg,#000,#f9a825);
+border-radius:50%;display:flex;align-items:center;justify-content:center;
+color:#fff;font-size:20px;cursor:pointer;
+}
+
+/* ===== MENU ===== */
+.menu{
+position:fixed;bottom:0;width:100%;
+background:#fff;display:flex;justify-content:space-around;
+padding:10px 0;border-top:1px solid #ddd;
+}
+
+.menu div{text-align:center;font-size:13px;color:#777;}
+.active{color:#4CAF50;}
+
+/* ===== SUPPORT ===== */
+
+.overlay{
+position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(6px);
+display:none;z-index:1000;
+}
+
+.support-box{
+position:fixed;bottom:0;width:100%;height:80%;
+background:#fff;border-radius:20px 20px 0 0;
+display:none;flex-direction:column;z-index:1001;
+}
+
+.support-header{
+background:linear-gradient(45deg,#6a11cb,#2575fc);
+color:#fff;padding:15px;border-radius:20px 20px 0 0;
+font-weight:bold;
+}
+
+.chat-box{
+flex:1;overflow:auto;padding:10px;
+}
+
+.msg{
+margin:8px 0;padding:10px;border-radius:10px;
+max-width:70%;
+}
+
+.user{
+background:#4CAF50;color:#fff;margin-left:auto;
+}
+
+.admin{
+background:#eee;
+}
+
+.input{
+display:flex;border-top:1px solid #ddd;
+}
+
+.input input{
+flex:1;padding:12px;border:none;
+}
+
+.input button{
+padding:12px;background:#6a11cb;color:#fff;border:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ===== WALLET ===== -->
+<div class="top">
+<div class="top-box">
+<h4>🏷 PORTEFEUIL REVENUS</h4>
+<p id="balance">0.00 FCFA</p>
+</div>
+
+<div class="top-box">
+<h4>🏷 PORTEFEUIL RECHARGE</h4>
+<p id="recharge">0.00 FCFA</p>
+</div>
+</div>
+
+<div class="history" onclick="location.href='history.html'">
+<span>Historique des retraits</span><span class="arrow">›</span>
+</div>
+
+<div class="history" onclick="location.href='history.html'">
+<span>Historique des fonds</span><span class="arrow">›</span>
+</div>
+
+<div class="actions">
+<div class="btn deposit" onclick="location.href='deposit.html'">⟲ depôt</div>
+<div class="btn withdraw" onclick="location.href='withdraw.html'">⟲ Retrait</div>
+</div>
+
+<div class="section">🏷 STATISTIQUES</div>
+
+<div class="stat"><span>Revenu D'aujourd'hui</span><span id="todayIncome">0</span></div>
+<div class="stat"><span>Revenu Total</span><span id="totalIncome">0</span></div>
+<div class="stat"><span>Recharge Totale</span><span id="totalDeposit">0</span></div>
+<div class="stat"><span>Total Retraits</span><span id="totalWithdraw">0</span></div>
+
+<div class="chat">💬</div>
+<div class="support" onclick="openSupport()">🎧</div>
+
+<div class="menu">
+<div onclick="location.href='dashboard.html'">⌂<br>Accueil</div>
+<div onclick="location.href='product.html'">▣<br>Produit</div>
+<div class="active">◧<br>Portefeuille</div>
+<div onclick="location.href='account.html'">○<br>Mon</div>
+</div>
+
+<!-- ===== SUPPORT UI ===== -->
+<div class="overlay" id="overlay" onclick="closeSupport()"></div>
+
+<div class="support-box" id="supportBox">
+<div class="support-header">Araimo Support</div>
+
+<div class="chat-box" id="chatBox"></div>
+
+<div class="input">
+<input id="msg" placeholder="Écrire un message...">
+<button onclick="send()">➤</button>
+</div>
+</div>
+
+<script>
+
+const client = supabase.createClient(
+"https://ycswpdydsgoqplkqtpsd.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3dwZHlkc2dvcXBsa3F0cHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjY4MTcsImV4cCI6MjA5MDU0MjgxN30.67bBMdHtcGFIJuZuY_Xd4hBN4hj86JjHVXGN3oPbKMA"
+);
+
+let userId = localStorage.getItem("user_id");
+let currentTicket = null;
+
+/* ===== WALLET ===== */
+async function loadWallet(){
+
+const { data: user } = await client
+.from("users")
+.select("balance")
+.eq("id", userId)
+.single();
+
+document.getElementById("balance").innerText =
+(user?.balance || 0) + " FCFA";
+
+const { data: tx } = await client
+.from("transactions")
+.select("*")
+.eq("user_id", userId);
+
+let today = new Date().toISOString().slice(0,10);
+let todayIncome=0,totalIncome=0,totalDeposit=0,totalWithdraw=0;
+
+tx.forEach(t=>{
+if(t.type==="daily_income"){
+totalIncome+=t.amount;
+if(t.created_at?.startsWith(today)){todayIncome+=t.amount;}
+}
+if(t.type==="deposit"){totalDeposit+=t.amount;}
+if(t.type==="withdraw"){totalWithdraw+=t.amount;}
+});
+
+document.getElementById("todayIncome").innerText = todayIncome+" FCFA";
+document.getElementById("totalIncome").innerText = totalIncome+" FCFA";
+document.getElementById("totalDeposit").innerText = totalDeposit+" FCFA";
+document.getElementById("totalWithdraw").innerText = totalWithdraw+" FCFA";
+
+}
+loadWallet();
+
+/* ===== SUPPORT ===== */
+
+async function openSupport(){
+
+document.getElementById("overlay").style.display="block";
+document.getElementById("supportBox").style.display="flex";
+
+/* chercher ticket */
+const { data } = await client
+.from("support_tickets")
+.select("*")
+.eq("user_id", userId)
+.eq("status","open")
+.limit(1)
+.single();
+
+if(data){
+currentTicket = data.id;
+}else{
+const { data:newTicket } = await client
+.from("support_tickets")
+.insert([{user_id:userId,title:"Support Araimo"}])
+.select()
+.single();
+
+currentTicket = newTicket.id;
+}
+
+loadMessages();
+}
+
+function closeSupport(){
+document.getElementById("overlay").style.display="none";
+document.getElementById("supportBox").style.display="none";
+}
+
+async function loadMessages(){
+
+if(!currentTicket) return;
+
+const { data } = await client
+.from("support_messages")
+.select("*")
+.eq("ticket_id", currentTicket)
+.order("created_at",{ascending:true});
+
+let html="";
+data.forEach(m=>{
+html+=`<div class="msg ${m.sender}">${m.message}</div>`;
+});
+
+document.getElementById("chatBox").innerHTML=html;
+
+let box=document.getElementById("chatBox");
+box.scrollTop=box.scrollHeight;
+}
+
+async function send(){
+
+let message=document.getElementById("msg").value;
+if(!message) return;
+
+await client.from("support_messages").insert([{
+ticket_id:currentTicket,
+user_id:userId,
+message:message,
+sender:"user"
+}]);
+
+document.getElementById("msg").value="";
+loadMessages();
+}
+
+/* TEMPS RÉEL */
+client
+.channel('chat')
+.on('postgres_changes',{
+event:'INSERT',
+schema:'public',
+table:'support_messages'
+},()=>{
+loadMessages();
+})
+.subscribe();
+
+</script>
+
+</body>
+</html>

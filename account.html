@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compte</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+
+body{
+margin:0;
+background:#f2f2f2;
+font-family:Arial;
+}
+
+/* CARD PROFILE */
+.card{
+margin:15px;
+padding:15px;
+border-radius:15px;
+background:linear-gradient(135deg,#f5e6c8,#f1d9a5);
+}
+
+/* TOP */
+.top{
+display:flex;
+align-items:center;
+justify-content:space-between;
+}
+
+.btn-old{
+background:#28a745;
+color:#fff;
+padding:8px 15px;
+border-radius:20px;
+font-size:13px;
+}
+
+/* USER */
+.user{
+display:flex;
+align-items:center;
+margin-top:10px;
+}
+
+.avatar{
+width:60px;
+height:60px;
+border-radius:50%;
+margin-right:10px;
+}
+
+.phone{
+font-weight:bold;
+font-size:18px;
+}
+
+.vip-badge{
+display:inline-block;
+background:#ff8c00;
+color:#fff;
+padding:3px 10px;
+border-radius:10px;
+font-size:12px;
+margin-left:8px;
+}
+
+/* VIP TEXT */
+.vip-text{
+margin-top:10px;
+color:green;
+font-size:14px;
+}
+
+/* MENU */
+.menu{
+margin:15px;
+display:flex;
+flex-direction:column;
+gap:12px;
+}
+
+.item{
+background:#fff;
+padding:15px;
+border-radius:12px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+font-size:16px;
+}
+
+.item span{
+color:#999;
+}
+
+/* FLOAT BUTTON */
+.chat{
+position:fixed;
+right:20px;
+bottom:100px;
+background:#2196f3;
+color:#fff;
+width:55px;
+height:55px;
+border-radius:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:20px;
+}
+
+/* BOTTOM MENU */
+.bottom{
+position:fixed;
+bottom:0;
+width:100%;
+background:#fff;
+display:flex;
+justify-content:space-around;
+padding:10px 0;
+border-top:1px solid #ddd;
+}
+
+.bottom div{
+text-align:center;
+font-size:13px;
+color:#999;
+}
+
+.active{
+color:#28a745;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- CARD -->
+<div class="card">
+
+<div class="top">
+<div></div>
+<div class="btn-old">Aller à l'ancienne version</div>
+</div>
+
+<div class="user">
+<img id="avatar" class="avatar" src="">
+
+<div>
+<div class="phone" id="phone">...</div>
+
+<div>
+<span class="vip-badge" id="vipBadge">VIP0</span>
+<span style="color:green;">Suivant VIP: <b id="nextVip">VIP1</b></span>
+</div>
+
+</div>
+</div>
+
+<div class="vip-text" id="vipText">
+Louez n'importe quel produit et devenez VIP1
+</div>
+
+</div>
+
+<!-- MENU -->
+<div class="menu">
+
+<div class="item" onclick="location.href='team.html'">
+Mon équipe <span>›</span>
+</div>
+
+<div class="item" onclick="location.href='product.html'">
+Mon Produit <span>›</span>
+</div>
+
+<div class="item" onclick="location.href='exchange.html'">
+Échanger Récompense <span>›</span>
+</div>
+
+<div class="item" onclick="location.href='invite.html'">
+Inviter Des Amis <span>›</span>
+</div>
+
+<div class="item" onclick="location.href='wallet.html'">
+Argent Mobile <span>›</span>
+</div>
+
+<div class="item" onclick="location.href='settings.html'">
+Paramètres <span>›</span>
+</div>
+
+<div class="item" onclick="downloadApp()">
+Téléchargement Application <span>›</span>
+</div>
+
+</div>
+
+<!-- FLOAT CHAT -->
+<div class="chat">💬</div>
+
+<!-- BOTTOM -->
+<div class="bottom">
+<div onclick="location.href='dashboard.html'"'">⌂<br>Accueil</div>
+<div onclick="location.href='product.html'">▣<br>Produit</div>
+<div onclick="location.href='wallet.html'">◧<br>Portefeuille</div>
+<div class="active">○<br>Mon</div>
+</div>
+
+<script>
+
+const client = supabase.createClient(
+"https://ycswpdydsgoqplkqtpsd.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3dwZHlkc2dvcXBsa3F0cHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjY4MTcsImV4cCI6MjA5MDU0MjgxN30.67bBMdHtcGFIJuZuY_Xd4hBN4hj86JjHVXGN3oPbKMA"
+);
+
+/* USER */
+async function loadUser(){
+
+let userId = localStorage.getItem("user_id");
+if(!userId) return;
+
+const { data } = await client
+.from("users")
+.select("full_name, phone, country_code")
+.eq("id", userId)
+.single();
+
+if(data){
+
+document.getElementById("phone").innerText =
+data.phone;
+
+let avatar = document.getElementById("avatar");
+avatar.src = "icône.png";
+
+}
+
+}
+
+/* VIP */
+async function loadVIP(){
+
+let userId = localStorage.getItem("user_id");
+if(!userId) return;
+
+const { data } = await client
+.from("user_vips")
+.select("id")
+.eq("user_id", userId);
+
+let level = data ? data.length : 0;
+
+document.getElementById("vipBadge").innerText = "VIP" + level;
+document.getElementById("nextVip").innerText = "VIP" + (level + 1);
+
+document.getElementById("vipText").innerText =
+"Louez n'importe quel produit et devenez VIP" + (level + 1);
+
+}
+
+/* DOWNLOAD */
+function downloadApp(){
+window.location.href = "/ARAIMO.apk";
+}
+
+loadUser();
+loadVIP();
+
+</script>
+
+</body>
+</html>

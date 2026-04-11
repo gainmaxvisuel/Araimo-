@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Inviter des amis</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+
+body{
+margin:0;
+background:#f5f5f5;
+font-family:Arial;
+}
+
+/* HEADER */
+.header{
+display:flex;
+align-items:center;
+padding:15px;
+background:#fff;
+border-bottom:1px solid #ddd;
+font-size:18px;
+font-weight:bold;
+}
+
+.back{
+font-size:20px;
+margin-right:10px;
+cursor:pointer;
+}
+
+/* SECTION */
+.section{
+margin:15px;
+}
+
+/* TITLE */
+.title{
+color:#28a745;
+font-weight:bold;
+margin-bottom:10px;
+font-size:15px;
+}
+
+/* BOX */
+.box{
+background:#e6f4ea;
+padding:15px;
+border-radius:12px;
+word-break:break-all;
+font-size:14px;
+}
+
+/* BUTTON */
+.btn{
+margin-top:15px;
+background:#28a745;
+color:#fff;
+padding:15px;
+text-align:center;
+border-radius:12px;
+font-weight:bold;
+cursor:pointer;
+}
+
+/* CODE */
+.code{
+background:#e6f4ea;
+padding:12px;
+border-radius:8px;
+display:inline-block;
+margin-top:10px;
+font-size:16px;
+font-weight:bold;
+}
+
+/* SMALL BUTTON */
+.copy-btn{
+margin-top:10px;
+background:#28a745;
+color:#fff;
+padding:10px;
+border-radius:8px;
+width:120px;
+text-align:center;
+cursor:pointer;
+}
+
+/* LIST */
+ul{
+padding-left:18px;
+}
+
+li{
+margin-bottom:12px;
+font-size:14px;
+}
+
+.green{
+color:#28a745;
+font-weight:bold;
+}
+
+/* TOAST */
+.toast{
+position:fixed;
+bottom:30px;
+left:50%;
+transform:translateX(-50%);
+background:#333;
+color:#fff;
+padding:12px 20px;
+border-radius:25px;
+font-size:14px;
+opacity:0;
+transition:0.3s;
+z-index:999;
+}
+
+.toast.show{
+opacity:1;
+bottom:50px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+<div class="back" onclick="goBack()">←</div>
+Inviter des amis
+</div>
+
+<!-- LINK -->
+<div class="section">
+<div class="title">VOTRE LIEN D'INVITATION</div>
+
+<div class="box" id="inviteLink">Chargement...</div>
+
+<div class="btn" onclick="copyLink()">COPIER LE LIEN</div>
+</div>
+
+<!-- CODE -->
+<div class="section">
+<div class="title">CODE D’INVITATION</div>
+
+<div class="code" id="inviteCode">...</div>
+
+<div class="copy-btn" onclick="copyCode()">Copier</div>
+</div>
+
+<!-- GAINS -->
+<div class="section">
+<div class="title">GAINS D'INVITATION</div>
+
+<ul>
+<li>
+Partagez votre lien d'invitation avec vos contacts et recevez automatiquement un <span class="green">bonus d'invitation</span>.
+</li>
+
+<li>
+Gagnez <span class="green">28% de commission</span> sur les utilisateurs directs (Niveau 1).
+</li>
+
+<li>
+Recevez <span class="green">3% de commission</span> sur le Niveau 2.
+</li>
+
+<li>
+Bénéficiez de <span class="green">1% de commission</span> sur le Niveau 3.
+</li>
+</ul>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script>
+
+const client = supabase.createClient(
+"https://ycswpdydsgoqplkqtpsd.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3dwZHlkc2dvcXBsa3F0cHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjY4MTcsImV4cCI6MjA5MDU0MjgxN30.67bBMdHtcGFIJuZuY_Xd4hBN4hj86JjHVXGN3oPbKMA"
+);
+
+/* LOAD DATA */
+async function loadInvite(){
+
+let userId = localStorage.getItem("user_id");
+if(!userId) return;
+
+const { data } = await client
+.from("users")
+.select("referral_code")
+.eq("id", userId)
+.single();
+
+if(data){
+
+let code = data.referral_code || "user123";
+
+let link = "https://araimo.vercel.app/register?ref=" + code;
+
+document.getElementById("inviteCode").innerText = code;
+document.getElementById("inviteLink").innerText = link;
+
+window.inviteLink = link;
+window.inviteCode = code;
+
+}
+
+}
+
+/* TOAST */
+function showToast(message){
+let toast = document.getElementById("toast");
+toast.innerText = message;
+toast.classList.add("show");
+
+setTimeout(()=>{
+toast.classList.remove("show");
+},2000);
+}
+
+/* COPY LINK */
+function copyLink(){
+navigator.clipboard.writeText(window.inviteLink);
+showToast("Lien copié avec succès");
+}
+
+/* COPY CODE */
+function copyCode(){
+navigator.clipboard.writeText(window.inviteCode);
+showToast("Code copié avec succès");
+}
+
+/* BACK */
+function goBack(){
+window.location.href = "account.html";
+}
+
+loadInvite();
+
+</script>
+
+</body>
+</html>

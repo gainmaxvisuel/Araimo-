@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accueil</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#f2f3f5;
+}
+
+/* SLIDER */
+.slider{
+width:92%;
+height:180px;
+margin:15px auto;
+border-radius:20px;
+overflow:hidden;
+position:relative;
+}
+
+.slide{
+width:100%;
+height:100%;
+position:absolute;
+background-size:cover;
+background-position:center;
+opacity:0;
+transition:1s;
+}
+
+.slide.active{
+opacity:1;
+}
+
+/* ACTIONS */
+.actions{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:10px;
+padding:10px;
+}
+
+.action{
+background:#fff;
+border-radius:15px;
+padding:15px;
+text-align:center;
+box-shadow:0 2px 8px rgba(0,0,0,0.05);
+cursor:pointer;
+}
+
+.action span{
+display:block;
+font-size:25px;
+margin-bottom:5px;
+color:#4CAF50;
+}
+
+/* SECTION */
+.section{
+padding:10px;
+font-weight:bold;
+}
+
+/* PRODUITS */
+.products-scroll{
+display:flex;
+gap:10px;
+overflow-x:auto;
+padding:10px;
+}
+
+.product{
+min-width:260px;
+background:#fff;
+padding:10px;
+border-radius:15px;
+box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+.product img{
+width:100%;
+height:120px;
+border-radius:10px;
+object-fit:cover;
+}
+
+/* MENU */
+.menu{
+position:fixed;
+bottom:0;
+width:100%;
+background:#fff;
+display:flex;
+justify-content:space-around;
+padding:10px 0;
+border-top:1px solid #ddd;
+}
+
+.menu div{
+text-align:center;
+font-size:13px;
+cursor:pointer;
+color:#777;
+}
+
+.menu div span{
+display:block;
+font-size:20px;
+}
+
+.active{
+color:#4CAF50;
+}
+
+/* TOAST */
+.toast{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+background:#333;
+color:#fff;
+padding:12px 20px;
+border-radius:10px;
+opacity:0;
+transition:0.3s;
+}
+
+.toast.show{ opacity:1; }
+.toast.success{ background:#2e7d32; }
+.toast.error{ background:#c62828; }
+
+</style>
+</head>
+
+<body>
+
+<!-- SLIDER -->
+<div class="slider" id="slider"></div>
+
+<!-- ACTIONS -->
+<div class="actions">
+
+<div class="action" onclick="location.href='product.html'">
+<span>📦</span>
+Produit
+</div>
+
+<div class="action" onclick="location.href='deposit.html'">
+<span>💳</span>
+Recharger
+</div>
+
+<div class="action" onclick="location.href='withdraw.html'">
+<span>💸</span>
+Retrait
+</div>
+
+<div class="action" onclick="openTeam()">
+<span>👥</span>
+Équipe
+</div>
+
+<div class="action" onclick="openInvite()">
+<span>➕</span>
+Inviter
+</div>
+
+<div class="action" onclick="openExchange()">
+<span>🔄</span>
+Échanger
+</div>
+
+</div>
+
+<!-- PRODUITS -->
+<div class="section">📌 Produits populaires</div>
+<div class="products-scroll" id="products"></div>
+
+<!-- MENU -->
+<div class="menu">
+
+<div class="active">
+<span>⌂</span>
+Accueil
+</div>
+
+<div onclick="location.href='product.html'">
+<span>▣</span>
+Produit
+</div>
+
+<div onclick="location.href='wallet.html'">
+<span>◧</span>
+Portefeuille
+</div>
+
+<div onclick="location.href='account.html'">
+<span>○</span>
+Mon
+</div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+
+const client = supabase.createClient(
+"https://ycswpdydsgoqplkqtpsd.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3dwZHlkc2dvcXBsa3F0cHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjY4MTcsImV4cCI6MjA5MDU0MjgxN30.67bBMdHtcGFIJuZuY_Xd4hBN4hj86JjHVXGN3oPbKMA"
+);
+
+const images = ["a1.jpg","a2.jpg","a3.jpg"];
+
+let slides=[];
+let i=0;
+
+/* SLIDER */
+function createSlider(){
+let box=document.getElementById("slider");
+box.innerHTML="";
+
+images.forEach((img,index)=>{
+box.innerHTML+=`
+<div class="slide ${index==0?'active':''}" style="background-image:url('${img}')"></div>
+`;
+});
+
+slides=document.querySelectorAll(".slide");
+
+setInterval(()=>{
+slides[i].classList.remove("active");
+i=(i+1)%slides.length;
+slides[i].classList.add("active");
+},3000);
+}
+
+/* PRODUITS */
+async function loadProducts(){
+const { data } = await client.from("vip_plans").select("*");
+
+let box=document.getElementById("products");
+box.innerHTML="";
+
+data.slice(0,5).forEach((p,index)=>{
+let img=images[index%images.length];
+
+let total = p.price + (p.price * 0.10 * p.cycle_days);
+
+box.innerHTML+=`
+<div class="product">
+<img src="${img}">
+<div>Prix: <b>${p.price} FCFA</b></div>
+<div>Revenu total: <b>${Math.round(total)} FCFA</b></div>
+</div>
+`;
+});
+}
+
+/* 👥 ÉQUIPE */
+function openTeam(){
+location.href="team.html";
+}
+
+/* ➕ INVITER */
+function openInvite(){
+location.href="invite.html";
+}
+
+/* 🔄 ÉCHANGER */
+function openExchange(){
+location.href="exchange.html";
+}
+
+/* INIT */
+createSlider();
+loadProducts();
+
+</script>
+
+</body>
+</html>

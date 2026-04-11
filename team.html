@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon équipe</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#f5f5f5;
+}
+
+/* HEADER */
+.header{
+display:flex;
+align-items:center;
+padding:15px;
+background:#fff;
+border-bottom:1px solid #ddd;
+}
+
+.back{
+font-size:22px;
+cursor:pointer;
+margin-right:10px;
+}
+
+.title{
+font-weight:bold;
+font-size:18px;
+}
+
+/* TOP STATS */
+.top{
+display:flex;
+justify-content:space-between;
+padding:15px;
+background:#fff;
+margin-bottom:10px;
+}
+
+.top div{
+text-align:center;
+}
+
+.top h2{
+margin:5px 0;
+color:#ff5a5a;
+}
+
+/* CARD */
+.card{
+background:#fff;
+margin:15px;
+padding:15px;
+border-radius:15px;
+}
+
+/* BOX */
+.row{
+display:flex;
+justify-content:space-between;
+margin-bottom:10px;
+}
+
+.smallBox{
+flex:1;
+background:#f0f0f0;
+margin:5px;
+padding:15px;
+border-radius:10px;
+text-align:center;
+}
+
+.level{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding-top:10px;
+border-top:1px dashed #ccc;
+font-size:16px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+<div class="back" onclick="location.href='account.html'">←</div>
+<div class="title">Mon équipe</div>
+</div>
+
+<!-- TOP -->
+<div class="top">
+<div>
+<p>REVENU TOTAL</p>
+<h2 id="totalRevenue">0 FCFA</h2>
+</div>
+
+<div>
+<p>TAILLE L'ÉQUIPE</p>
+<h2 id="teamSize">0</h2>
+</div>
+</div>
+
+<!-- B -->
+<div class="card">
+<div class="row">
+<div class="smallBox">
+<p>Taille</p>
+<h3 id="bSize">0</h3>
+</div>
+
+<div class="smallBox">
+<p>Revenu</p>
+<h3 id="bRevenue">0 FCFA</h3>
+</div>
+</div>
+
+<div class="level">
+<span>< A > Niveau</span>
+<span>→</span>
+</div>
+</div>
+
+<!-- C -->
+<div class="card">
+<div class="row">
+<div class="smallBox">
+<p>Taille</p>
+<h3 id="cSize">0</h3>
+</div>
+
+<div class="smallBox">
+<p>Revenu</p>
+<h3 id="cRevenue">0 FCFA</h3>
+</div>
+</div>
+
+<div class="level">
+<span>< B > Niveau</span>
+<span>→</span>
+</div>
+</div>
+
+<!-- D -->
+<div class="card">
+<div class="row">
+<div class="smallBox">
+<p>Taille</p>
+<h3 id="dSize">0</h3>
+</div>
+
+<div class="smallBox">
+<p>Revenu</p>
+<h3 id="dRevenue">0 FCFA</h3>
+</div>
+</div>
+
+<div class="level">
+<span>< C > Niveau</span>
+<span>→</span>
+</div>
+</div>
+
+<script>
+
+const client = supabase.createClient(
+"https://ycswpdydsgoqplkqtpsd.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3dwZHlkc2dvcXBsa3F0cHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjY4MTcsImV4cCI6MjA5MDU0MjgxN30.67bBMdHtcGFIJuZuY_Xd4hBN4hj86JjHVXGN3oPbKMA"
+);
+
+let userId = localStorage.getItem("user_id");
+
+async function loadTeam(){
+
+if(!userId) return;
+
+/* USERS */
+const { data:users } = await client
+.from("users")
+.select("id, referred_by");
+
+/* COMMISSIONS */
+const { data:coms } = await client
+.from("commissions")
+.select("amount, user_id, from_user");
+
+/* LEVELS */
+let lvl1 = users.filter(u => u.referred_by === userId);
+
+let lvl2 = users.filter(u =>
+lvl1.some(l1 => l1.id === u.referred_by)
+);
+
+let lvl3 = users.filter(u =>
+lvl2.some(l2 => l2.id === u.referred_by)
+);
+
+/* REVENUS */
+let bRev = 0, cRev = 0, dRev = 0;
+
+coms.forEach(c => {
+
+if(lvl1.some(u => u.id === c.from_user)){
+bRev += c.amount;
+}
+
+if(lvl2.some(u => u.id === c.from_user)){
+cRev += c.amount;
+}
+
+if(lvl3.some(u => u.id === c.from_user)){
+dRev += c.amount;
+}
+
+});
+
+/* TOTAL */
+let totalRev = bRev + cRev + dRev;
+let totalUsers = lvl1.length + lvl2.length + lvl3.length;
+
+/* UI */
+document.getElementById("totalRevenue").innerText = totalRev + " FCFA";
+document.getElementById("teamSize").innerText = totalUsers;
+
+document.getElementById("bSize").innerText = lvl1.length;
+document.getElementById("cSize").innerText = lvl2.length;
+document.getElementById("dSize").innerText = lvl3.length;
+
+document.getElementById("bRevenue").innerText = bRev + " FCFA";
+document.getElementById("cRevenue").innerText = cRev + " FCFA";
+document.getElementById("dRevenue").innerText = dRev + " FCFA";
+
+}
+
+loadTeam();
+
+</script>
+
+</body>
+</html>

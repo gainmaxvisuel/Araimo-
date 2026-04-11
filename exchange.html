@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Échanger Code</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#f4f4f4;
+}
+
+/* HEADER */
+.header{
+display:flex;
+align-items:center;
+padding:15px;
+background:#fff;
+border-bottom:1px solid #ddd;
+}
+
+.back{
+font-size:22px;
+cursor:pointer;
+margin-right:10px;
+}
+
+.title{
+font-size:18px;
+font-weight:bold;
+}
+
+/* CONTAINER */
+.container{
+padding:20px;
+text-align:center;
+}
+
+/* IMAGE */
+.img{
+width:180px;
+margin:30px auto;
+}
+
+/* INPUT */
+.input{
+width:100%;
+padding:15px;
+border-radius:15px;
+border:1px solid #ddd;
+font-size:16px;
+outline:none;
+}
+
+/* BUTTON */
+.btn{
+margin-top:20px;
+padding:15px;
+border-radius:30px;
+background:linear-gradient(90deg,#f7b500,#ffa500);
+color:#fff;
+font-size:18px;
+border:none;
+width:100%;
+cursor:pointer;
+}
+
+/* MESSAGE */
+.message{
+margin-top:15px;
+font-size:14px;
+}
+
+.success{color:green;}
+.error{color:red;}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+<div class="back" onclick="location.href='account.html'">←</div>
+<div class="title">Échanger Code</div>
+</div>
+
+<div class="container">
+
+<img src="https://cdn-icons-png.flaticon.com/512/7486/7486740.png" class="img">
+
+<input type="text" id="codeInput" class="input" placeholder="Veuillez saisir le code d'échange">
+
+<button class="btn" onclick="useCode()">Confirmer</button>
+
+<div id="msg" class="message"></div>
+
+</div>
+
+<script>
+
+const client = supabase.createClient(
+"https://ycswpdydsgoqplkqtpsd.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3dwZHlkc2dvcXBsa3F0cHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjY4MTcsImV4cCI6MjA5MDU0MjgxN30.67bBMdHtcGFIJuZuY_Xd4hBN4hj86JjHVXGN3oPbKMA"
+);
+
+let userId = localStorage.getItem("user_id");
+
+async function useCode(){
+
+let code = document.getElementById("codeInput").value.trim();
+let msg = document.getElementById("msg");
+
+if(!code){
+msg.innerHTML = "Veuillez entrer un code";
+msg.className = "message error";
+return;
+}
+
+/* APPEL FONCTION SQL */
+const { data, error } = await client.rpc('use_bonus', {
+p_user: userId,
+p_code: code
+});
+
+if(error){
+msg.innerHTML = "Erreur serveur";
+msg.className = "message error";
+return;
+}
+
+/* RESULT */
+if(data === "success"){
+msg.innerHTML = "✅ Bonus ajouté avec succès";
+msg.className = "message success";
+document.getElementById("codeInput").value = "";
+}else{
+msg.innerHTML = "❌ " + data;
+msg.className = "message error";
+}
+
+}
+
+</script>
+
+</body>
+</html>

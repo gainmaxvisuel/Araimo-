@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produits</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#f5f5f5;
+}
+
+/* HEADER */
+.header{
+padding:15px;
+font-size:20px;
+font-weight:bold;
+}
+
+/* FILTER */
+.filter{
+display:flex;
+gap:10px;
+padding:10px;
+}
+
+.filter div{
+padding:8px 15px;
+border-radius:20px;
+border:1px solid #2e7d32;
+cursor:pointer;
+}
+
+.active-filter{
+background:#2e7d32;
+color:#fff;
+}
+
+/* CONTAINER */
+.container{
+padding:10px;
+margin-bottom:90px;
+}
+
+/* CARD */
+.card{
+background:#fff;
+border-radius:20px;
+padding:10px;
+margin-bottom:15px;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* TOP */
+.top{
+display:flex;
+gap:10px;
+}
+
+.vip-img{
+width:110px;
+height:110px;
+border-radius:15px;
+object-fit:cover;
+}
+
+/* INFO */
+.info{
+flex:1;
+font-size:14px;
+color:#555;
+}
+
+.info b{
+color:#222;
+}
+
+/* BOTTOM */
+.bottom{
+display:flex;
+justify-content:space-between;
+margin-top:10px;
+}
+
+.box{
+background:#eef6ee;
+padding:8px;
+border-radius:10px;
+font-size:13px;
+flex:1;
+margin:2px;
+text-align:center;
+color:#2e7d32;
+font-weight:bold;
+}
+
+/* BUTTON */
+.btn{
+margin-top:10px;
+width:100%;
+padding:12px;
+border:none;
+border-radius:12px;
+background:#2e7d32;
+color:#fff;
+font-weight:bold;
+cursor:pointer;
+}
+
+.btn:disabled{
+background:#999;
+}
+
+/* MENU */
+.menu{
+position:fixed;
+bottom:0;
+width:100%;
+background:#fff;
+display:flex;
+justify-content:space-around;
+padding:10px 0;
+border-top:1px solid #ddd;
+}
+
+.menu div{
+text-align:center;
+font-size:13px;
+cursor:pointer;
+color:#777;
+}
+
+.menu div span{
+display:block;
+font-size:20px;
+}
+
+.active-menu{
+color:#2e7d32;
+}
+
+/* TOAST */
+.toast{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+background:#333;
+color:#fff;
+padding:12px 20px;
+border-radius:10px;
+font-size:14px;
+opacity:0;
+transition:0.3s;
+z-index:999;
+}
+
+.toast.show{
+opacity:1;
+}
+
+.toast.success{ background:#2e7d32; }
+.toast.error{ background:#c62828; }
+.toast.info{ background:#1565c0; }
+
+</style>
+</head>
+
+<body>
+
+<div class="header">Produits</div>
+
+<!-- FILTRE -->
+<div class="filter">
+<div id="btnAll" class="active-filter" onclick="setFilter('all')">Tous</div>
+<div id="btnOwned" onclick="setFilter('owned')">P</div>
+</div>
+
+<div class="container" id="plans"></div>
+
+<!-- MENU -->
+<div class="menu">
+<div onclick="location.href='dashboard.html'">
+<span>⌂</span>
+Accueil
+</div>
+
+<div class="active-menu">
+<span>▣</span>
+Produit
+</div>
+
+<div onclick="location.href='wallet.html'">
+<span>◧</span>
+Portefeuille
+</div>
+
+<div onclick="location.href='account.html'">
+<span>○</span>
+Mon
+</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script>
+
+const supabaseClient = supabase.createClient(
+"https://ycswpdydsgoqplkqtpsd.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3dwZHlkc2dvcXBsa3F0cHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjY4MTcsImV4cCI6MjA5MDU0MjgxN30.67bBMdHtcGFIJuZuY_Xd4hBN4hj86JjHVXGN3oPbKMA"
+);
+
+const images = ["a1.jpg","a2.jpg","a3.jpg"];
+
+let ownedVIPs = [];
+let allPlans = [];
+let currentFilter = "all";
+
+// format argent
+function format(x){
+return Number(x).toLocaleString() + " FCFA";
+}
+
+// TOAST
+function showToast(message, type="info"){
+let toast = document.getElementById("toast");
+toast.innerText = message;
+toast.className = "toast show " + type;
+
+setTimeout(()=>{
+toast.classList.remove("show");
+},3000);
+}
+
+// charger vip user
+async function loadUserVIPs(user_id){
+const { data } = await supabaseClient
+.from("user_vips")
+.select("vip_id")
+.eq("user_id", user_id);
+
+ownedVIPs = data.map(v => v.vip_id);
+}
+
+// charger produits
+async function loadPlans(){
+
+let user_id = localStorage.getItem("user_id");
+
+if(!user_id){
+showToast("Session expirée. Veuillez vous reconnecter.", "error");
+return;
+}
+
+await loadUserVIPs(user_id);
+
+const { data } = await supabaseClient
+.from("vip_plans")
+.select("*")
+.order("price",{ascending:true});
+
+allPlans = data;
+
+renderPlans();
+}
+
+// afficher
+function renderPlans(){
+
+let container = document.getElementById("plans");
+container.innerHTML = "";
+
+let filtered = currentFilter === "owned"
+? allPlans.filter(p => ownedVIPs.includes(p.id))
+: allPlans;
+
+if(filtered.length === 0){
+container.innerHTML = "<div style='text-align:center;color:#777;margin-top:20px;'>Aucun produit disponible</div>";
+return;
+}
+
+filtered.forEach((plan,index)=>{
+
+let img = images[index % images.length];
+let owned = ownedVIPs.includes(plan.id);
+
+let card = document.createElement("div");
+
+card.innerHTML = `
+<div class="card">
+
+<div class="top">
+<img src="${img}" class="vip-img">
+
+<div class="info">
+<div>Prix : <b>${format(plan.price)}</b></div>
+<div>Revenu Quotidien : <b>${format(plan.daily_income)}</b></div>
+<div>Revenu Total : <b>${format(plan.total_income)}</b></div>
+<div>Cycles : <b>${plan.cycle_days} jours</b></div>
+</div>
+</div>
+
+<div class="bottom">
+<div class="box">Nom<br>${plan.name}</div>
+<div class="box">Taux<br>${Math.round((plan.total_income/plan.price)*100)}%</div>
+</div>
+
+<button class="btn" id="btn-${plan.id}" ${owned ? "disabled" : ""} onclick="buy('${plan.id}')">
+${owned ? "Déjà acheté" : "Investir"}
+</button>
+
+</div>
+`;
+
+container.appendChild(card);
+
+});
+
+}
+
+// filtre
+function setFilter(type){
+
+currentFilter = type;
+
+document.getElementById("btnAll").classList.remove("active-filter");
+document.getElementById("btnOwned").classList.remove("active-filter");
+
+if(type === "all"){
+document.getElementById("btnAll").classList.add("active-filter");
+}else{
+document.getElementById("btnOwned").classList.add("active-filter");
+}
+
+renderPlans();
+}
+
+// achat
+async function buy(vip_id){
+
+let user_id = localStorage.getItem("user_id");
+let btn = document.getElementById("btn-"+vip_id);
+
+btn.disabled = true;
+btn.innerText = "Traitement en cours...";
+
+const { error } = await supabaseClient.rpc("buy_vip", {
+p_user_id: user_id,
+p_vip_id: vip_id
+});
+
+if(error){
+
+btn.disabled = false;
+btn.innerText = "Investir";
+
+if(error.message.includes("solde")){
+showToast("Solde insuffisant pour effectuer cet achat.", "error");
+}else{
+showToast("Une erreur est survenue. Veuillez réessayer.", "error");
+}
+
+return;
+}
+
+ownedVIPs.push(vip_id);
+
+btn.innerText = "Achat effectué";
+btn.style.background = "#4CAF50";
+
+showToast("Investissement effectué avec succès.", "success");
+
+}
+
+// init
+loadPlans();
+
+</script>
+
+</body>
+</html>
