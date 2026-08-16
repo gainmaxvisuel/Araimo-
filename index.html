@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ORAIMO | Inscription</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+
+/* =========================
+   STYLE ORAIMO
+========================= */
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f2f3f5;
+    color:#333;
+    min-height:100vh;
+}
+
+/* HEADER */
+
+.header{
+    background:#fff;
+    padding:18px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-bottom:1px solid #e5e5e5;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.logo-icon{
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    background:#4CAF50;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.logo-name{
+    font-size:24px;
+    font-weight:bold;
+    color:#4CAF50;
+}
+
+/* CONTAINER */
+
+.container{
+    width:92%;
+    max-width:430px;
+    margin:25px auto 100px;
+}
+
+/* CARD */
+
+.card{
+    background:#fff;
+    border-radius:20px;
+    padding:25px 20px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.06);
+}
+
+/* TITRE */
+
+.title{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.title-icon{
+    width:65px;
+    height:65px;
+    margin:0 auto 15px;
+    background:#e8f5e9;
+    color:#4CAF50;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+}
+
+.title h1{
+    margin:0 0 8px;
+    font-size:25px;
+    color:#333;
+}
+
+.title p{
+    margin:0;
+    color:#888;
+    font-size:14px;
+    line-height:1.5;
+}
+
+/* CHAMPS */
+
+.input-group{
+    margin-bottom:15px;
+    position:relative;
+}
+
+.input{
+    width:100%;
+    height:52px;
+    border:1px solid #ddd;
+    border-radius:14px;
+    background:#fff;
+    padding:0 16px;
+    font-size:15px;
+    outline:none;
+    color:#333;
+    transition:0.2s;
+}
+
+.input:focus{
+    border-color:#4CAF50;
+    box-shadow:0 0 0 3px rgba(76,175,80,0.10);
+}
+
+.input::placeholder{
+    color:#999;
+}
+
+/* TELEPHONE */
+
+.phone-box{
+    width:100%;
+    height:52px;
+    border:1px solid #ddd;
+    border-radius:14px;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    padding:0 14px;
+    transition:0.2s;
+}
+
+.phone-box:focus-within{
+    border-color:#4CAF50;
+    box-shadow:0 0 0 3px rgba(76,175,80,0.10);
+}
+
+.country-select{
+    min-width:78px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:#4CAF50;
+    font-weight:bold;
+    cursor:pointer;
+    user-select:none;
+}
+
+.divider{
+    width:1px;
+    height:24px;
+    background:#ddd;
+    margin:0 12px;
+}
+
+.phone-box input{
+    flex:1;
+    min-width:0;
+    border:none;
+    outline:none;
+    background:transparent;
+    font-size:15px;
+    color:#333;
+}
+
+.phone-box input::placeholder{
+    color:#999;
+}
+
+/* MENU PAYS */
+
+.dropdown{
+    display:none;
+    position:absolute;
+    top:59px;
+    left:0;
+    width:100%;
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:14px;
+    overflow:hidden;
+    z-index:100;
+    box-shadow:0 5px 20px rgba(0,0,0,0.12);
+}
+
+.dropdown div{
+    padding:14px 15px;
+    font-size:14px;
+    border-bottom:1px solid #eee;
+    cursor:pointer;
+}
+
+.dropdown div:last-child{
+    border-bottom:none;
+}
+
+.dropdown div:hover{
+    background:#e8f5e9;
+    color:#4CAF50;
+}
+
+/* PASSWORD */
+
+.pass-box{
+    position:relative;
+}
+
+.pass-box .input{
+    padding-right:50px;
+}
+
+.eye{
+    position:absolute;
+    right:16px;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+    color:#888;
+    font-size:18px;
+}
+
+/* PARRAINAGE */
+
+#referral{
+    border-style:dashed;
+}
+
+#referral:read-only{
+    background:#f5faf5;
+    border-color:#4CAF50;
+    color:#4CAF50;
+}
+
+/* ERREUR */
+
+.error{
+    min-height:20px;
+    text-align:center;
+    color:#d32f2f;
+    font-size:13px;
+    margin:5px 0;
+}
+
+/* BOUTON */
+
+button{
+    width:100%;
+    height:52px;
+    margin-top:10px;
+    border:none;
+    border-radius:14px;
+    background:#4CAF50;
+    color:#fff;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+    box-shadow:0 3px 10px rgba(76,175,80,0.20);
+}
+
+button:hover{
+    background:#43a047;
+}
+
+button:active{
+    transform:scale(0.98);
+}
+
+button:disabled{
+    background:#aaa;
+    cursor:not-allowed;
+    box-shadow:none;
+}
+
+/* CONNEXION */
+
+.link{
+    text-align:center;
+    margin-top:20px;
+    color:#888;
+    font-size:14px;
+}
+
+.link a{
+    color:#4CAF50;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+/* INFORMATIONS */
+
+.info{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+    margin-top:15px;
+}
+
+.info-item{
+    background:#fff;
+    border-radius:14px;
+    padding:13px 5px;
+    text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+
+.info-item span{
+    display:block;
+    font-size:21px;
+    margin-bottom:5px;
+}
+
+.info-item strong{
+    display:block;
+    font-size:11px;
+    color:#555;
+}
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#333;
+    color:#fff;
+    padding:12px 20px;
+    border-radius:10px;
+    opacity:0;
+    pointer-events:none;
+    transition:0.3s;
+    z-index:1000;
+    font-size:14px;
+}
+
+.toast.show{
+    opacity:1;
+}
+
+.toast.success{
+    background:#2e7d32;
+}
+
+.toast.error{
+    background:#c62828;
+}
+
+/* MOBILE */
+
+@media(max-width:380px){
+
+    .container{
+        width:94%;
+    }
+
+    .card{
+        padding:22px 16px;
+    }
+
+    .title h1{
+        font-size:23px;
+    }
+
+    .info-item strong{
+        font-size:10px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     LOGO ORAIMO
+========================= -->
+
+<div class="header">
+
+    <div class="logo">
+
+        <div class="logo-icon">
+            O
+        </div>
+
+        <div class="logo-name">
+            ORAIMO
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     FORMULAIRE
+========================= -->
+
+<div class="container">
+
+    <div class="card">
+
+        <div class="title">
+
+            <div class="title-icon">
+                👤
+            </div>
+
+            <h1>
+                Créer votre compte
+            </h1>
+
+            <p>
+                Rejoignez ORAIMO et commencez
+                votre aventure dès aujourd'hui.
+            </p>
+
+        </div>
+
+
+        <!-- NOM -->
+
+        <div class="input-group">
+
+            <input
+                class="input"
+                id="name"
+                type="text"
+                placeholder="Nom complet"
+                autocomplete="name"
+            >
+
+        </div>
+
+
+        <!-- TELEPHONE -->
+
+        <div class="input-group">
+
+            <div class="phone-box">
+
+                <div
+                    class="country-select"
+                    onclick="toggleDropdown()"
+                >
+
+                    <span id="selectedCountry">
+                        +226
+                    </span>
+
+                    <span>
+                        ▼
+                    </span>
+
+                </div>
+
+                <div class="divider"></div>
+
+                <input
+                    type="tel"
+                    id="phone"
+                    placeholder="Numéro de téléphone"
+                    inputmode="numeric"
+                    autocomplete="tel"
+                >
+
+            </div>
+
+
+            <!-- PAYS -->
+
+            <div
+                class="dropdown"
+                id="dropdownList"
+            >
+
+                <div onclick="selectCountry('+226')">
+                    🇧🇫 Burkina Faso (+226)
+                </div>
+
+                <div onclick="selectCountry('+225')">
+                    🇨🇮 Côte d'Ivoire (+225)
+                </div>
+
+                <div onclick="selectCountry('+229')">
+                    🇧🇯 Bénin (+229)
+                </div>
+
+                <div onclick="selectCountry('+221')">
+                    🇸🇳 Sénégal (+221)
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MOT DE PASSE -->
+
+        <div class="input-group pass-box">
+
+            <input
+                class="input"
+                type="password"
+                id="pass"
+                placeholder="Mot de passe"
+                autocomplete="new-password"
+            >
+
+            <span
+                class="eye"
+                onclick="togglePass('pass',this)"
+            >
+                👁️
+            </span>
+
+        </div>
+
+
+        <!-- CONFIRMATION -->
+
+        <div class="input-group pass-box">
+
+            <input
+                class="input"
+                type="password"
+                id="confirm"
+                placeholder="Confirmer mot de passe"
+                autocomplete="new-password"
+            >
+
+            <span
+                class="eye"
+                onclick="togglePass('confirm',this)"
+            >
+                👁️
+            </span>
+
+        </div>
+
+
+        <!-- CODE INVITATION -->
+
+        <div class="input-group">
+
+            <input
+                class="input"
+                id="referral"
+                placeholder="Code d'invitation (Optionnel)"
+            >
+
+        </div>
+
+
+        <!-- MESSAGE ERREUR -->
+
+        <div
+            class="error"
+            id="msg"
+        ></div>
+
+
+        <!-- BOUTON -->
+
+        <button
+            id="btn"
+            onclick="register()"
+        >
+            Créer mon compte
+        </button>
+
+
+        <!-- LOGIN -->
+
+        <div class="link">
+
+            Déjà membre ?
+
+            <a href="login.html">
+                Connectez-vous ici
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- INFORMATIONS -->
+
+    <div class="info">
+
+        <div class="info-item">
+
+            <span>🔒</span>
+
+            <strong>
+                Sécurisé
+            </strong>
+
+        </div>
+
+        <div class="info-item">
+
+            <span>✓</span>
+
+            <strong>
+                Fiable
+            </strong>
+
+        </div>
+
+        <div class="info-item">
+
+            <span>💬</span>
+
+            <strong>
+                Assistance
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div
+    id="toast"
+    class="toast"
+></div>
+
+
+<script>
+
+/* =========================
+   SUPABASE
+========================= */
+
+const client = supabase.createClient(
+
+    "https://ycswpdydsgoqplkqtpsd.supabase.co",
+
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3dwZHlkc2dvcXBsa3F0cHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjY4MTcsImV4cCI6MjA5MDU0MjgxN30.67bBMdHtcGFIJuZuY_Xd4hBN4hj86JjHVXGN3oPbKMA"
+
+);
+
+
+/* =========================
+   PAYS
+========================= */
+
+let country_code = "+226";
+
+
+function toggleDropdown(){
+
+    const list =
+        document.getElementById(
+            "dropdownList"
+        );
+
+    list.style.display =
+        list.style.display === "block"
+        ? "none"
+        : "block";
+
+}
+
+
+function selectCountry(code){
+
+    country_code = code;
+
+    document.getElementById(
+        "selectedCountry"
+    ).innerText = code;
+
+    document.getElementById(
+        "dropdownList"
+    ).style.display = "none";
+
+}
+
+
+/* Fermer le menu */
+
+document.addEventListener(
+    "click",
+    function(event){
+
+        const zone =
+            document.querySelector(
+                ".country-select"
+            );
+
+        const list =
+            document.getElementById(
+                "dropdownList"
+            );
+
+        if(
+            !zone.contains(event.target) &&
+            !list.contains(event.target)
+        ){
+
+            list.style.display = "none";
+
+        }
+
+    }
+);
+
+
+/* =========================
+   PASSWORD
+========================= */
+
+function togglePass(id,eye){
+
+    const input =
+        document.getElementById(id);
+
+    if(
+        input.type === "password"
+    ){
+
+        input.type = "text";
+
+        eye.innerText = "🙈";
+
+    }else{
+
+        input.type = "password";
+
+        eye.innerText = "👁️";
+
+    }
+
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+function showToast(message,type){
+
+    const toast =
+        document.getElementById("toast");
+
+    toast.innerText = message;
+
+    toast.className =
+        "toast show " + type;
+
+    setTimeout(function(){
+
+        toast.className = "toast";
+
+    },2500);
+
+}
+
+
+/* =========================
+   INSCRIPTION
+========================= */
+
+async function register(){
+
+    const name =
+        document.getElementById(
+            "name"
+        ).value.trim();
+
+    const phone =
+        document.getElementById(
+            "phone"
+        ).value.trim();
+
+    const pass =
+        document.getElementById(
+            "pass"
+        ).value;
+
+    const confirm =
+        document.getElementById(
+            "confirm"
+        ).value;
+
+    const referral =
+        document.getElementById(
+            "referral"
+        ).value.trim();
+
+    const msg =
+        document.getElementById(
+            "msg"
+        );
+
+    const btn =
+        document.getElementById(
+            "btn"
+        );
+
+
+    msg.innerText = "";
+
+
+    /* Champs obligatoires */
+
+    if(
+        !name ||
+        !phone ||
+        !pass ||
+        !confirm
+    ){
+
+        msg.innerText =
+            "Veuillez remplir tous les champs obligatoires.";
+
+        return;
+
+    }
+
+
+    /* Téléphone */
+
+    if(
+        !/^[0-9]+$/.test(phone)
+    ){
+
+        msg.innerText =
+            "Veuillez entrer un numéro de téléphone valide.";
+
+        return;
+
+    }
+
+
+    /* Mot de passe */
+
+    if(
+        pass !== confirm
+    ){
+
+        msg.innerText =
+            "Les mots de passe ne correspondent pas.";
+
+        return;
+
+    }
+
+
+    btn.disabled = true;
+
+    btn.innerText =
+        "Création du compte...";
+
+
+    try{
+
+        const { error } =
+            await client.rpc(
+                "register_user",
+                {
+
+                    p_full_name:
+                        name,
+
+                    p_country_code:
+                        country_code,
+
+                    p_phone:
+                        phone,
+
+                    p_password:
+                        pass,
+
+                    p_referral_code:
+                        referral || null
+
+                }
+            );
+
+
+        if(error){
+
+            throw error;
+
+        }
+
+
+        showToast(
+            "Bienvenue sur ORAIMO !",
+            "success"
+        );
+
+
+        setTimeout(function(){
+
+            window.location.href =
+                "login.html";
+
+        },2500);
+
+
+    }catch(err){
+
+        console.error(err);
+
+        msg.innerText =
+            "Erreur : " + err.message;
+
+        btn.disabled = false;
+
+        btn.innerText =
+            "Créer mon compte";
+
+    }
+
+}
+
+
+/* =========================
+   PARRAINAGE ?ref=
+========================= */
+
+window.onload = function(){
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const ref =
+        params.get("ref");
+
+
+    if(ref){
+
+        const input =
+            document.getElementById(
+                "referral"
+            );
+
+        input.value = ref;
+
+        input.readOnly = true;
+
+        input.style.borderStyle =
+            "solid";
+
+    }
+
+};
+
+</script>
+
+</body>
+</html>

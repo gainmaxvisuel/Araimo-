@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ORAIMO | Connexion</title>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+
+/* =========================
+   ORAIMO - CHARTE GRAPHIQUE
+========================= */
+
+:root{
+    --green:#4CAF50;
+    --green-dark:#2e7d32;
+    --green-light:#e8f5e9;
+    --bg:#f2f3f5;
+    --white:#ffffff;
+    --text:#222;
+    --gray:#777;
+    --border:#e1e1e1;
+    --error:#c62828;
+}
+
+*{
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--text);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:20px;
+
+    padding-bottom:40px;
+}
+
+/* =========================
+   CONTAINER
+========================= */
+
+.container{
+    width:100%;
+    max-width:430px;
+
+    background:var(--white);
+
+    border-radius:22px;
+
+    padding:30px 24px;
+
+    box-shadow:
+        0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* =========================
+   LOGO ORAIMO
+========================= */
+
+.logo{
+    text-align:center;
+    margin-bottom:8px;
+}
+
+.logo-mark{
+    width:62px;
+    height:62px;
+
+    margin:0 auto 10px;
+
+    border-radius:18px;
+
+    background:var(--green);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:white;
+
+    font-size:30px;
+    font-weight:bold;
+
+    box-shadow:
+        0 6px 15px rgba(76,175,80,0.25);
+}
+
+.logo-name{
+    font-size:28px;
+    font-weight:bold;
+    color:var(--green);
+    letter-spacing:-1px;
+}
+
+.logo-subtitle{
+    font-size:13px;
+    color:var(--gray);
+    margin-top:4px;
+}
+
+/* =========================
+   TITRE
+========================= */
+
+.title{
+    text-align:center;
+    margin:28px 0 25px;
+}
+
+.title h1{
+    margin:0;
+
+    font-size:24px;
+    font-weight:bold;
+}
+
+.title p{
+    margin:8px 0 0;
+
+    color:var(--gray);
+    font-size:14px;
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+.input-group{
+    margin-bottom:16px;
+    position:relative;
+}
+
+.input-field,
+.phone-box{
+
+    width:100%;
+
+    height:54px;
+
+    background:#fafafa;
+
+    border:1px solid var(--border);
+
+    border-radius:14px;
+
+    outline:none;
+
+    font-size:15px;
+
+    transition:0.2s;
+}
+
+.input-field{
+    padding:0 16px;
+}
+
+.input-field:focus,
+.phone-box:focus-within{
+
+    border-color:var(--green);
+
+    background:#fff;
+
+    box-shadow:
+        0 0 0 3px rgba(76,175,80,0.10);
+}
+
+/* =========================
+   TELEPHONE
+========================= */
+
+.phone-box{
+
+    display:flex;
+    align-items:center;
+
+    padding:0 14px;
+}
+
+.country-select{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    min-width:70px;
+
+    color:var(--green);
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    user-select:none;
+}
+
+.country-arrow{
+    font-size:11px;
+}
+
+.divider{
+
+    width:1px;
+    height:22px;
+
+    background:#ddd;
+
+    margin:0 12px;
+}
+
+.phone-box input{
+
+    flex:1;
+
+    border:none;
+
+    outline:none;
+
+    background:transparent;
+
+    font-size:15px;
+
+    color:#222;
+
+    min-width:0;
+}
+
+/* =========================
+   MENU PAYS
+========================= */
+
+.phone-group{
+    position:relative;
+}
+
+.dropdown{
+
+    display:none;
+
+    position:absolute;
+
+    left:0;
+    right:0;
+
+    top:62px;
+
+    z-index:100;
+
+    background:#fff;
+
+    border:1px solid #ddd;
+
+    border-radius:14px;
+
+    overflow:hidden;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.12);
+}
+
+.dropdown div{
+
+    padding:14px 15px;
+
+    font-size:14px;
+
+    cursor:pointer;
+
+    border-bottom:1px solid #f0f0f0;
+
+    transition:0.2s;
+}
+
+.dropdown div:last-child{
+    border-bottom:none;
+}
+
+.dropdown div:hover{
+
+    background:var(--green-light);
+
+    color:var(--green-dark);
+}
+
+/* =========================
+   MOT DE PASSE
+========================= */
+
+.pass-box{
+    position:relative;
+}
+
+.eye{
+
+    position:absolute;
+
+    right:16px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    cursor:pointer;
+
+    color:#888;
+
+    font-size:18px;
+}
+
+.eye:hover{
+    color:var(--green);
+}
+
+/* =========================
+   MOT DE PASSE OUBLIE
+========================= */
+
+.forgot{
+
+    text-align:right;
+
+    margin-top:-5px;
+    margin-bottom:18px;
+}
+
+.forgot a{
+
+    color:var(--green-dark);
+
+    font-size:13px;
+
+    text-decoration:none;
+}
+
+.forgot a:hover{
+    text-decoration:underline;
+}
+
+/* =========================
+   BOUTON
+========================= */
+
+button{
+
+    width:100%;
+
+    height:54px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:var(--green);
+
+    color:#fff;
+
+    font-size:16px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:0.2s;
+
+    box-shadow:
+        0 5px 14px rgba(76,175,80,0.20);
+}
+
+button:hover{
+
+    background:var(--green-dark);
+
+    transform:translateY(-1px);
+}
+
+button:active{
+    transform:translateY(1px);
+}
+
+button:disabled{
+
+    background:#aaa;
+
+    box-shadow:none;
+
+    cursor:not-allowed;
+}
+
+/* =========================
+   MESSAGE
+========================= */
+
+.error{
+
+    min-height:22px;
+
+    text-align:center;
+
+    margin:10px 0;
+
+    font-size:14px;
+
+    font-weight:500;
+}
+
+/* =========================
+   INSCRIPTION
+========================= */
+
+.register{
+
+    text-align:center;
+
+    margin-top:22px;
+
+    color:var(--gray);
+
+    font-size:14px;
+}
+
+.register a{
+
+    color:var(--green-dark);
+
+    font-weight:bold;
+
+    text-decoration:none;
+}
+
+.register a:hover{
+    text-decoration:underline;
+}
+
+/* =========================
+   SECURITE
+========================= */
+
+.security{
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    gap:6px;
+
+    margin-top:20px;
+
+    color:#999;
+
+    font-size:12px;
+}
+
+.security-icon{
+    color:var(--green);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:400px){
+
+    .container{
+        padding:25px 18px;
+    }
+
+    .logo-name{
+        font-size:26px;
+    }
+
+    .title h1{
+        font-size:22px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- LOGO ORAIMO -->
+
+    <div class="logo">
+
+        <div class="logo-mark">
+            O
+        </div>
+
+        <div class="logo-name">
+            ORAIMO
+        </div>
+
+        <div class="logo-subtitle">
+            Votre plateforme, simplement.
+        </div>
+
+    </div>
+
+
+    <!-- TITRE -->
+
+    <div class="title">
+
+        <h1>Bienvenue sur ORAIMO</h1>
+
+        <p>
+            Connectez-vous à votre compte
+        </p>
+
+    </div>
+
+
+    <!-- TELEPHONE -->
+
+    <div class="input-group phone-group">
+
+        <div class="phone-box">
+
+            <div
+                class="country-select"
+                onclick="toggleDropdown()"
+            >
+
+                <span id="selectedCountry">
+                    +226
+                </span>
+
+                <span class="country-arrow">
+                    ▼
+                </span>
+
+            </div>
+
+            <div class="divider"></div>
+
+            <input
+                type="tel"
+                id="phone"
+                placeholder="Numéro de téléphone"
+                inputmode="numeric"
+            >
+
+        </div>
+
+
+        <!-- PAYS -->
+
+        <div
+            class="dropdown"
+            id="dropdownList"
+        >
+
+            <div onclick="selectCountry('+226')">
+                🇧🇫 Burkina Faso (+226)
+            </div>
+
+            <div onclick="selectCountry('+225')">
+                🇨🇮 Côte d'Ivoire (+225)
+            </div>
+
+            <div onclick="selectCountry('+223')">
+                🇲🇱 Mali (+223)
+            </div>
+
+            <div onclick="selectCountry('+227')">
+                🇳🇪 Niger (+227)
+            </div>
+
+            <div onclick="selectCountry('+228')">
+                🇹🇬 Togo (+228)
+            </div>
+
+            <div onclick="selectCountry('+229')">
+                🇧🇯 Bénin (+229)
+            </div>
+
+            <div onclick="selectCountry('+221')">
+                🇸🇳 Sénégal (+221)
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- MOT DE PASSE -->
+
+    <div class="input-group pass-box">
+
+        <input
+            class="input-field"
+            type="password"
+            id="pass"
+            placeholder="Mot de passe"
+        >
+
+        <span
+            class="eye"
+            onclick="togglePass()"
+        >
+            👁️
+        </span>
+
+    </div>
+
+
+    <!-- MOT DE PASSE OUBLIE -->
+
+    <div class="forgot">
+
+        <a href="forgot-password.html">
+            Mot de passe oublié ?
+        </a>
+
+    </div>
+
+
+    <!-- MESSAGE -->
+
+    <div
+        class="error"
+        id="msg"
+    ></div>
+
+
+    <!-- BOUTON -->
+
+    <button
+        id="loginBtn"
+        onclick="login()"
+    >
+        Se connecter
+    </button>
+
+
+    <!-- INSCRIPTION -->
+
+    <div class="register">
+
+        Pas encore de compte ?
+
+        <a href="index.html">
+            Créer un compte
+        </a>
+
+    </div>
+
+
+    <!-- SECURITE -->
+
+    <div class="security">
+
+        <span class="security-icon">🔒</span>
+
+        Connexion sécurisée
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   SUPABASE
+========================= */
+
+const { createClient } = supabase;
+
+const client = createClient(
+
+    "https://ycswpdydsgoqplkqtpsd.supabase.co",
+
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3dwZHlkc2dvcXBsa3F0cHNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjY4MTcsImV4cCI6MjA5MDU0MjgxN30.67bBMdHtcGFIJuZuY_Xd4hBN4hj86JjHVXGN3oPbKMA"
+
+);
+
+
+/* =========================
+   PAYS
+========================= */
+
+let country_code = "+226";
+
+
+function toggleDropdown(){
+
+    const list =
+        document.getElementById("dropdownList");
+
+    list.style.display =
+        list.style.display === "block"
+        ? "none"
+        : "block";
+
+}
+
+
+function selectCountry(code){
+
+    country_code = code;
+
+    document.getElementById(
+        "selectedCountry"
+    ).innerText = code;
+
+    document.getElementById(
+        "dropdownList"
+    ).style.display = "none";
+
+}
+
+
+/* Fermer le menu */
+
+document.addEventListener(
+    "click",
+    function(event){
+
+        const zone =
+            document.querySelector(
+                ".country-select"
+            );
+
+        const list =
+            document.getElementById(
+                "dropdownList"
+            );
+
+        if(
+            zone &&
+            !zone.contains(event.target) &&
+            !list.contains(event.target)
+        ){
+
+            list.style.display = "none";
+
+        }
+
+    }
+);
+
+
+/* =========================
+   PASSWORD
+========================= */
+
+function togglePass(){
+
+    const p =
+        document.getElementById("pass");
+
+    p.type =
+        p.type === "password"
+        ? "text"
+        : "password";
+
+}
+
+
+/* =========================
+   CONNEXION
+========================= */
+
+async function login(){
+
+    const phone =
+        document
+        .getElementById("phone")
+        .value
+        .replace(/\s+/g,"");
+
+    const pass =
+        document
+        .getElementById("pass")
+        .value
+        .trim();
+
+    const msg =
+        document.getElementById("msg");
+
+    const btn =
+        document.getElementById("loginBtn");
+
+
+    msg.innerText = "";
+
+
+    /* Vérification */
+
+    if(!phone || !pass){
+
+        msg.style.color =
+            "var(--error)";
+
+        msg.innerText =
+            "Veuillez remplir tous les champs.";
+
+        return;
+
+    }
+
+
+    btn.disabled = true;
+
+    btn.innerText =
+        "Connexion...";
+
+
+    try{
+
+        const { data, error } =
+
+            await client
+            .from("users")
+            .select("id")
+            .eq(
+                "country_code",
+                country_code
+            )
+            .eq(
+                "phone",
+                phone
+            )
+            .eq(
+                "password",
+                pass
+            );
+
+
+        if(error){
+
+            throw error;
+
+        }
+
+
+        if(
+            !data ||
+            data.length === 0
+        ){
+
+            throw new Error(
+                "Numéro ou mot de passe incorrect."
+            );
+
+        }
+
+
+        /* Enregistrer l'utilisateur */
+
+        localStorage.setItem(
+            "user_id",
+            data[0].id
+        );
+
+
+        msg.style.color =
+            "var(--green-dark)";
+
+        msg.innerText =
+            "Connexion réussie !";
+
+
+        btn.innerText =
+            "Bienvenue sur ORAIMO";
+
+
+        /* Redirection */
+
+        setTimeout(
+
+            function(){
+
+                window.location.href =
+                    "dashboard.html";
+
+            },
+
+            1000
+
+        );
+
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+        msg.style.color =
+            "var(--error)";
+
+        msg.innerText =
+            err.message ||
+            "Une erreur est survenue.";
+
+        btn.disabled = false;
+
+        btn.innerText =
+            "Se connecter";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
